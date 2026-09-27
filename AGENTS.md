@@ -79,3 +79,30 @@ Each substantial phase should leave behind beginner-friendly notes under `dev-no
 When a phase adds or changes user-facing behavior, also update the published docs
 under `website/content/` (the "Use Tau" guides and reference).
 
+## Cursor Cloud specific instructions
+
+Tau is a single-process terminal coding agent (CLI/TUI). There is no backend
+server, database, or Docker; it talks to external LLM APIs over HTTP. Standard
+dev commands live in `README.md` and `CONTRIBUTING.md`; run everything through
+`uv` (for example `uv run pytest`, `uv run tau`).
+
+- Tooling: the project uses `uv`. It is preinstalled on the VM and on `PATH`
+  via `~/.bashrc`/`~/.profile`. The startup update script runs `uv sync --dev`,
+  so dependencies are ready; you do not need to reinstall them.
+- Running the app end to end without a provider: the interactive TUI (`uv run
+  tau`) and print mode (`uv run tau -p "..."`) require a configured model
+  provider (API key or `/login` OAuth), which is not available in this
+  environment. For a no-network end-to-end exercise of the agent loop and the
+  built-in `read`/`write`/`edit`/`bash` tools, drive a `CodingSession` with
+  `tau_ai.FakeProvider` (see `tests/test_coding_session.py` and
+  `tests/pi_event_helpers.py` for the scripted-event pattern).
+- Known pre-existing test failures (not an environment problem): with the
+  locked `rich`/`textual`/`typer` versions, a small set of terminal
+  width/wrapping assertions currently fail (`tests/test_cli.py`,
+  `tests/test_tui_app.py`, `tests/test_tui_autocomplete.py`). The other ~1461
+  tests pass and `ruff`/`ruff format`/`mypy` are clean. Do not treat these
+  rendering-width failures as a setup regression.
+- Optional docs site (`website/`) needs Hugo extended, which is not installed by
+  default; install it only if you specifically need to build/preview docs
+  (`cd website && hugo server -D`).
+
